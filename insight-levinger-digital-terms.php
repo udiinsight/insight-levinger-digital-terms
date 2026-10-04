@@ -3,7 +3,7 @@
  * Plugin Name: Insight - Levinger - Digital Terms
  * Plugin URI: https://github.com/udiinsight/insight-levinger-digital-terms
  * Description: תגיות Dynamic Data ל-Bricks עבור דף התקנון הדיגיטלי לבדיקת התאמה — פרטי התור מפרמטרים בקישור ופרטי המרכז הרפואי משדות דף המרכז.
- * Version: 2.1.0
+ * Version: 2.1.1
  * Author: Insight Marketing
  * Author URI: https://insight-marketing.co.il
  * Text Domain: insight-levinger-digital-terms
@@ -19,7 +19,7 @@ const ILDT_TAGS = array(
 	'ildt_patient'               => 'שם המטופל (patient)',
 	'ildt_date'                  => 'תאריך הבדיקה (date)',
 	'ildt_time'                  => 'שעת הבדיקה (time)',
-	'ildt_doctor'                => 'שם הרופא (doctor)',
+	'ildt_doctor'                => 'שם הרופא (doctor_name)',
 	'ildt_health_url'            => 'קישור הצהרת בריאות (health)',
 	'ildt_pay_url'               => 'קישור לתשלום (pay)',
 	'ildt_center_name'           => 'מרכז — שם (כותרת הדף)',
@@ -118,7 +118,7 @@ function ildt_values() {
 			'ildt_patient'    => esc_html( ildt_param( 'patient', 60 ) ),
 			'ildt_date'       => esc_html( ildt_format_date( ildt_param( 'date', 20 ) ) ),
 			'ildt_time'       => preg_match( '/^([01]?\d|2[0-3]):[0-5]\d$/', $time ) ? $time : '',
-			'ildt_doctor'     => esc_html( ildt_param( 'doctor', 80 ) ),
+			'ildt_doctor'     => esc_html( ildt_param( 'doctor_name', 80 ) ),
 			'ildt_health_url' => esc_url( ildt_url_param( 'health' ) ),
 			'ildt_pay_url'    => esc_url( ildt_url_param( 'pay' ) ),
 		),

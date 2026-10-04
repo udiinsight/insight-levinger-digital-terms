@@ -2,7 +2,7 @@
 Contributors: insightmarketing
 Requires at least: 6.0
 Requires PHP: 8.0
-Stable tag: 2.1.0
+Stable tag: 2.1.1
 License: GPLv2 or later
 
 Bricks dynamic data tags for the pre-exam digital terms page (/pre-exam-instructions/).
@@ -12,7 +12,7 @@ Bricks dynamic data tags for the pre-exam digital terms page (/pre-exam-instruct
 Registers a "תקנון דיגיטלי" group of Bricks dynamic tags, filled from the page URL and from the
 matching medical-center page:
 
-* {ildt_patient}, {ildt_doctor}, {ildt_date}, {ildt_time} — from ?patient=, ?doctor=, ?date= (YYYY-MM-DD or DD/MM/YYYY), ?time= (HH:MM)
+* {ildt_patient}, {ildt_doctor}, {ildt_date}, {ildt_time} — from ?patient=, ?doctor_name=, ?date= (YYYY-MM-DD or DD/MM/YYYY), ?time= (HH:MM)
 * {ildt_health_url}, {ildt_pay_url} — from ?health= and ?pay= (http/https only, URL-encoded)
 * {ildt_center_name} (post title), {ildt_center_address}, {ildt_center_parking},
   {ildt_center_transportation}, {ildt_center_waze} — from ?center= (medical-center slug or post ID)
@@ -21,8 +21,11 @@ Any page whose Bricks content uses these tags is served noindex, no-referrer and
 
 == Changelog ==
 
+= 2.1.1 =
+* fix: doctor param renamed to ?doctor_name= — ?doctor= is the doctor CPT query var and redirected to the doctors archive.
+
 = 2.1.0 =
-* feat: {ildt_doctor} from ?doctor=.
+* feat: {ildt_doctor} from ?doctor= (renamed in 2.1.1).
 * feat: {ildt_pay_url} from ?pay= replaces {ildt_area_url} (?area= removed; the personal-area link is now fixed in the page).
 
 = 2.0.2 =
