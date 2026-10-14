@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Insight - Levinger - Digital Terms
  * Plugin URI: https://github.com/udiinsight/insight-levinger-digital-terms
- * Description: תגיות Dynamic Data ל-Bricks עבור דף התקנון הדיגיטלי לבדיקת התאמה — פרטי התור מפרמטרים בקישור ופרטי המרכז הרפואי משדות דף המרכז.
- * Version: 2.1.1
+ * Description: תגיות Dynamic Data ל-Bricks עבור הדפים הדיגיטליים לבדיקת התאמה ולפני ניתוח הסרת משקפיים — פרטי התור מפרמטרים בקישור ופרטי המרכז הרפואי משדות דף המרכז.
+ * Version: 2.2.0
  * Author: Insight Marketing
  * Author URI: https://insight-marketing.co.il
  * Text Domain: insight-levinger-digital-terms
@@ -22,12 +22,89 @@ const ILDT_TAGS = array(
 	'ildt_doctor'                => 'שם הרופא (doctor_name)',
 	'ildt_health_url'            => 'קישור הצהרת בריאות (health)',
 	'ildt_pay_url'               => 'קישור לתשלום (pay)',
+	'ildt_op'                    => 'סוג הניתוח (op)',
+	'ildt_op_prk'                => 'ניתוח PRK / LASEK (לתנאים)',
 	'ildt_center_name'           => 'מרכז — שם (כותרת הדף)',
 	'ildt_center_address'        => 'מרכז — כתובת',
 	'ildt_center_parking'        => 'מרכז — חניה',
 	'ildt_center_transportation' => 'מרכז — תחבורה ציבורית',
 	'ildt_center_waze'           => 'מרכז — קישור Waze',
+	'ildt_center_fax'            => 'מרכז — פקס',
+	'ildt_center_glasses'        => 'מרכז — משקפי מגן',
+	'ildt_center_soft_lenses'    => 'מרכז — הסרת עדשות רכות',
+	'ildt_center_hard_lenses'    => 'מרכז — הסרת עדשות קשות',
+	'ildt_center_bank'           => 'מרכז — חשבון להעברה בנקאית',
+	'ildt_center_finance_wa'     => 'מרכז — וואטסאפ כספים (קישור)',
+	'ildt_center_finance_email'  => 'מרכז — מייל כספים (קישור)',
+	'ildt_center_finance_phone'  => 'מרכז — טלפון כספים (קישור)',
+	'ildt_center_phone'          => 'מרכז — טלפון לפני ניתוח (קישור)',
+	'ildt_center_wa'             => 'מרכז — וואטסאפ תיאום (קישור)',
+	'ildt_center_email'          => 'מרכז — מייל תיאום (קישור)',
 );
+
+const ILDT_PREOP_FIELDS = array(
+	'preop_glasses'         => array( 'משקפי מגן', 'textarea' ),
+	'preop_soft_lenses'     => array( 'הסרת עדשות מגע רכות (זמן לפני הניתוח)', 'text' ),
+	'preop_hard_lenses'     => array( 'הסרת עדשות מגע קשות (זמן לפני הניתוח)', 'text' ),
+	'preop_bank'            => array( 'חשבון להעברה בנקאית', 'textarea' ),
+	'preop_finance_wa'      => array( 'וואטסאפ כספים', 'text' ),
+	'preop_finance_email'   => array( 'מייל כספים', 'text' ),
+	'preop_finance_phone'   => array( 'טלפון כספים (אופציונלי)', 'text' ),
+	'preop_phone'           => array( 'טלפון לשאלות לפני ניתוח', 'text' ),
+	'preop_wa'              => array( 'וואטסאפ תיאום', 'text' ),
+	'preop_email'           => array( 'מייל תיאום (אופציונלי)', 'text' ),
+);
+
+add_action(
+	'acf/init',
+	function () {
+		$fields = array();
+		foreach ( ILDT_PREOP_FIELDS as $name => $def ) {
+			$fields[] = array(
+				'key'       => 'field_ildt_' . $name,
+				'name'      => $name,
+				'label'     => $def[0],
+				'type'      => $def[1],
+				'rows'      => 3,
+				'new_lines' => 'br',
+			);
+		}
+		acf_add_local_field_group(
+			array(
+				'key'        => 'group_ildt_preop',
+				'title'      => 'דף הנחיות לפני ניתוח',
+				'fields'     => $fields,
+				'location'   => array( array( array( 'param' => 'post_type', 'operator' => '==', 'value' => 'medical-center' ) ) ),
+				'menu_order' => 100,
+			)
+		);
+	}
+);
+
+function ildt_phone_link( $value ) {
+	if ( ! preg_match( '/^([\d*#+\-\s]+)(.*)$/u', $value, $m ) ) {
+		return esc_html( $value );
+	}
+	$number = trim( $m[1] );
+	$tel    = preg_replace( '/[^\d*#+]/', '', $number );
+	return '<a href="tel:' . esc_attr( $tel ) . '" dir="ltr">' . esc_html( $number ) . '</a>' . esc_html( rtrim( ' ' . trim( $m[2] ) ) );
+}
+
+function ildt_wa_link( $value ) {
+	$digits = preg_replace( '/\D/', '', $value );
+	if ( '' === $digits ) {
+		return '';
+	}
+	if ( '0' === $digits[0] ) {
+		$digits = '972' . substr( $digits, 1 );
+	}
+	return '<a href="https://wa.me/' . $digits . '" target="_blank" rel="noopener" dir="ltr">' . esc_html( $value ) . '</a>';
+}
+
+function ildt_email_link( $value ) {
+	$email = sanitize_email( $value );
+	return $email ? '<a href="mailto:' . esc_attr( $email ) . '" dir="ltr">' . esc_html( $email ) . '</a>' : '';
+}
 
 function ildt_param( $key, $max = 80 ) {
 	if ( ! isset( $_GET[ $key ] ) || is_array( $_GET[ $key ] ) ) {
@@ -84,12 +161,29 @@ function ildt_get_center( $ref ) {
 		return trim( wp_kses( $field( $name ), $allowed ) );
 	};
 
+	$link = function ( $name, $builder ) use ( $field ) {
+		$value = $field( $name );
+		return '' === $value ? '' : $builder( $value );
+	};
+	$fax  = $field( 'fax' );
+
 	return array(
 		'ildt_center_name'           => esc_html( get_the_title( $id ) ),
 		'ildt_center_address'        => $html( 'address' ),
 		'ildt_center_parking'        => $html( 'parking' ),
 		'ildt_center_transportation' => $html( 'transportation' ),
 		'ildt_center_waze'           => esc_url( $waze ),
+		'ildt_center_fax'            => '' === $fax ? '' : '<span dir="ltr">' . esc_html( $fax ) . '</span>',
+		'ildt_center_glasses'        => $html( 'preop_glasses' ),
+		'ildt_center_soft_lenses'    => esc_html( $field( 'preop_soft_lenses' ) ),
+		'ildt_center_hard_lenses'    => esc_html( $field( 'preop_hard_lenses' ) ),
+		'ildt_center_bank'           => $html( 'preop_bank' ),
+		'ildt_center_finance_wa'     => $link( 'preop_finance_wa', 'ildt_wa_link' ),
+		'ildt_center_finance_email'  => $link( 'preop_finance_email', 'ildt_email_link' ),
+		'ildt_center_finance_phone'  => $link( 'preop_finance_phone', 'ildt_phone_link' ),
+		'ildt_center_phone'          => $link( 'preop_phone', 'ildt_phone_link' ),
+		'ildt_center_wa'             => $link( 'preop_wa', 'ildt_wa_link' ),
+		'ildt_center_email'          => $link( 'preop_email', 'ildt_email_link' ),
 	);
 }
 
@@ -112,6 +206,7 @@ function ildt_values() {
 		return $values;
 	}
 	$time   = ildt_param( 'time', 5 );
+	$op     = ildt_param( 'op', 80 );
 	$values = array_merge(
 		array_fill_keys( array_keys( ILDT_TAGS ), '' ),
 		array(
@@ -121,6 +216,8 @@ function ildt_values() {
 			'ildt_doctor'     => esc_html( ildt_param( 'doctor_name', 80 ) ),
 			'ildt_health_url' => esc_url( ildt_url_param( 'health' ) ),
 			'ildt_pay_url'    => esc_url( ildt_url_param( 'pay' ) ),
+			'ildt_op'         => esc_html( $op ),
+			'ildt_op_prk'     => preg_match( '/PRK|LASEK/i', $op ) ? '1' : '',
 		),
 		ildt_get_center( ildt_param( 'center', 100 ) )
 	);
